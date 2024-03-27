@@ -1,0 +1,84 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Data (assuming same format as before)
+untrained_participants = [
+    "Social Indoor base",
+    "Social Indoor Interaction",
+    "Social Outdoor base",
+    "Social Outdoor Interaction"
+]
+
+trained_participants = [
+    "Social Indoor base",
+    "Social Indoor Interaction",
+    "Social Outdoor base",
+    "Social Outdoor Interaction"
+]
+
+untrained_cog_indoor_inter = [
+    0.2626428574, 0.2442872406, 0.176111111, 0.1677527472
+]
+
+trained_cog_indoor_inter = [
+    0.472063492, 0.4386706836, 0.2463657406, 0.7452976188
+]
+
+untrained_std_dev_indoor_inter = [
+    0.0665675662, 0.0530118878, 0.0660834082, 0.0344644064
+]
+
+trained_std_dev_indoor_inter = [
+    0.128420166, 0.1372477238, 0.0665220568, 0.1112006604 
+]
+
+# Plot
+fig, ax = plt.subplots(figsize=(12, 6))  # Adjust figsize for better visualization
+
+# Bar width
+bar_width = 0.35
+index = np.arange(len(untrained_participants))
+
+# Untrained bars
+untrained_bars = ax.bar(index - bar_width/2, untrained_cog_indoor_inter, bar_width,
+                        yerr=untrained_std_dev_indoor_inter, capsize=5, label='Untrained', color='lightblue', alpha=0.8)
+
+# Trained bars
+trained_bars = ax.bar(index + bar_width/2, trained_cog_indoor_inter, bar_width,
+                        yerr=trained_std_dev_indoor_inter, capsize=5, label='Trained', color='blue', alpha=0.8)
+
+# Significance bars
+for i in range(len(untrained_participants)):
+    # Calculate significance at 0.05 level
+    significance = '*' if abs(untrained_cog_indoor_inter[i] - trained_cog_indoor_inter[i]) >= 1.96 * (
+                untrained_std_dev_indoor_inter[i] ** 2 + trained_std_dev_indoor_inter[i] ** 2) ** 0.5 else ''
+    ax.text(index[i], max(untrained_cog_indoor_inter[i], trained_cog_indoor_inter[i]) + 0.05, significance,
+            ha='center', va='bottom', fontsize=10)
+
+# Annotations (text above bars) - adjust y_offset for better placement
+y_offset = 0.14
+
+for i, (value, std) in enumerate(zip(untrained_cog_indoor_inter, untrained_std_dev_indoor_inter)):
+    ax.text(index[i] - bar_width/2, value + y_offset, f"{value:.2f} ± {std:.2f}", ha='center', va='bottom', fontsize=8)
+
+for i, (value, std) in enumerate(zip(trained_cog_indoor_inter, trained_std_dev_indoor_inter)):
+    ax.text(index[i] + bar_width/2, value + y_offset, f"{value:.2f} ± {std:.2f}", ha='center', va='bottom', fontsize=8)
+
+# X-axis ticks and labels (consider rotation for long participant names)
+ax.set_xticks(index)
+ax.set_xticklabels(untrained_participants)
+
+# Labels and title
+ax.set_xlabel('Types')
+ax.set_ylabel('Mean Score with Standard Deviation([*] Significant at 0.05 level)', fontsize=8, fontweight='bold')
+ax.set_title('Social Overall', fontsize=14, fontweight='bold')
+
+# Legend
+ax.legend()
+
+# Grid lines
+ax.grid(axis='y', linestyle='--', alpha=0.7)
+
+# Adjust layout to prevent overlapping elements
+plt.tight_layout()
+plt.show()
